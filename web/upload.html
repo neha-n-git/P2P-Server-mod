@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P File Upload</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+        .container { border: 1px solid #ccc; padding: 2rem; border-radius: 8px; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; }
+        input[type="file"] { display: block; }
+        button { background: #007bff; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #status { margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload File to P2P Network</h1>
+        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Select File:</label>
+                <input type="file" id="file" name="file" required>
+            </div>
+            <button type="submit">Upload & Chunk</button>
+        </form>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = 'Uploading...';
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const text = await response.text();
+                statusDiv.textContent = response.ok ? 'Success: ' + text : 'Error: ' + text;
+            } catch (err) {
+                statusDiv.textContent = 'Network Error: ' + err.message;
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P File Download</title>
+    <style>
+        body { font-family: sans-serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
+        .container { border: 1px solid #ccc; padding: 2rem; border-radius: 8px; }
+        h1 { margin-top: 0; }
+        button { background: #007bff; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-bottom: 1rem; }
+        button:hover { background: #0056b3; }
+        .file-card { border: 1px solid #ddd; padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .file-info { flex: 1; }
+        .file-info strong { display: block; }
+        .file-info small { color: #666; }
+        .download-btn { background: #28a745; font-size: 0.9rem; }
+        .download-btn:hover { background: #218838; }
+        #status { margin-top: 1rem; padding: 0.5rem; border-radius: 4px; display: none; }
+        .status-success { background: #d4edda; color: #155724; display: block !important; }
+        .status-error { background: #f8d7da; color: #721c24; display: block !important; }
+        .status-loading { background: #cce5ff; color: #004085; display: block !important; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        nav { margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav><a href="/">← Upload</a></nav>
+        <h1>Download Files from Peers</h1>
+        <button id="refreshBtn" onclick="browseFiles()">Refresh File List</button>
+        <div id="fileList"></div>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const fileListDiv = document.getElementById('fileList');
+
+        function setStatus(msg, type) {
+            statusDiv.textContent = msg;
+            statusDiv.className = 'status-' + type;
+        }
+
+        async function browseFiles() {
+            fileListDiv.innerHTML = '';
+            setStatus('Scanning peers for available files...', 'loading');
+            try {
+                const resp = await fetch('/api/browse');
+                if (!resp.ok) throw new Error(await resp.text());
+                const files = await resp.json();
+                statusDiv.style.display = 'none';
+
+                if (!files || files.length === 0) {
+                    fileListDiv.innerHTML = '<p>No files found on any peers. Make sure peers are running and have shared files.</p>';
+                    return;
+                }
+
+                files.forEach(f => {
+                    const card = document.createElement('div');
+                    card.className = 'file-card';
+                    card.innerHTML = `
+                        <div class="file-info">
+                            <strong>${f.file_name}</strong>
+                            <small>Size: ${formatSize(f.file_size)} | Chunks: ${f.total_chunks} | Peer: ${f.peer_address}</small>
+                        </div>
+                        <button class="download-btn" onclick="downloadFile('${f.file_name}', '${f.peer_address}')">Download</button>
+                    `;
+                    fileListDiv.appendChild(card);
+                });
+            } catch(err) {
+                setStatus('Error: ' + err.message, 'error');
+            }
+        }
+
+        async function downloadFile(name, peer) {
+            setStatus(`Downloading "${name}" from ${peer}...`, 'loading');
+            try {
+                const resp = await fetch(`/api/download?name=${encodeURIComponent(name)}&peer=${encodeURIComponent(peer)}`);
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.error || JSON.stringify(data));
+                setStatus(`Success! Downloaded "${data.file_name}" (${formatSize(data.file_size)}) → ${data.saved_to}`, 'success');
+            } catch(err) {
+                setStatus('Download failed: ' + err.message, 'error');
+            }
+        }
+
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
+        // Auto-load on page open
+        browseFiles();
+    </script>
+</body>
+</html>
