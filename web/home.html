@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P File Sharing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 0.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.55);
+            font-size: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .cards {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            width: 240px;
+            text-decoration: none;
+            color: #fff;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+            border-color: rgba(255,255,255,0.25);
+        }
+
+        .card-icon {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .card p {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.5;
+        }
+
+        .card.upload:hover { border-color: #60a5fa; box-shadow: 0 12px 40px rgba(96,165,250,0.15); }
+        .card.download:hover { border-color: #34d399; box-shadow: 0 12px 40px rgba(52,211,153,0.15); }
+
+        .peer-info {
+            margin-top: 2.5rem;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>P2P File Sharing</h1>
+        <p class="subtitle">Choose an action for this peer</p>
+
+        <div class="cards">
+            <a href="/upload" class="card upload">
+                <span class="card-icon">&#x1F4E4;</span>
+                <h2>Upload</h2>
+                <p>Share a file with the P2P network by splitting it into chunks</p>
+            </a>
+
+            <a href="/download" class="card download">
+                <span class="card-icon">&#x1F4E5;</span>
+                <h2>Download</h2>
+                <p>Browse and download files available from connected peers</p>
+            </a>
+        </div>
+
+        <p class="peer-info">This peer is running on this machine. All peers can upload and download.</p>
+    </div>
+</body>
+</html>

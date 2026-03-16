@@ -18,7 +18,7 @@
 <body>
     <div class="container">
         <h1>Upload File to P2P Network</h1>
-        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+        <form id="uploadForm" action="/api/upload" method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="file">Select File:</label>
                 <input type="file" id="file" name="file" required>
@@ -36,7 +36,7 @@
             statusDiv.textContent = 'Uploading...';
             
             try {
-                const response = await fetch('/upload', {
+                const response = await fetch('/api/upload', {
                     method: 'POST',
                     body: formData
                 });

@@ -21,14 +21,23 @@ func main() {
 
 	p := peer.NewPeer(*peerName, *port)
 
-	// Initialize Transport (modular — can be swapped for a different implementation)
 	t := transport.NewHTTPTransport()
 
-	// Register known peers
 	if *peersList != "" {
 		selfAddr := fmt.Sprintf("localhost:%d", *port)
-		for _, peerAddr := range strings.Split(*peersList, ",") {
+
+		// Collect peers from comma-separated flag value
+		allPeerAddrs := strings.Split(*peersList, ",")
+
+		// Also include any remaining positional args as peers
+		// (supports: -peers localhost:8080 localhost:8081)
+		allPeerAddrs = append(allPeerAddrs, flag.Args()...)
+
+		for _, peerAddr := range allPeerAddrs {
 			addr := strings.TrimSpace(peerAddr)
+			if addr == "" {
+				continue
+			}
 			registry.AddPeer(addr)
 			// Attempt to register ourselves with the remote peer
 			if err := t.RegisterWithPeer(addr, selfAddr); err != nil {
@@ -43,12 +52,15 @@ func main() {
 
 	// Setup Routes — Web Pages
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/home.html")
+	})
+	http.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "web/upload.html")
 	})
 	http.HandleFunc("/download", handler.DownloadPageHandler())
 
 	// Setup Routes — File Operations
-	http.HandleFunc("/upload", handler.UploadHandler(p))
+	http.HandleFunc("/api/upload", handler.UploadHandler(p))
 
 	// Setup Routes — P2P API (JSON-based)
 	http.HandleFunc("/api/register", handler.RegisterHandler(p))

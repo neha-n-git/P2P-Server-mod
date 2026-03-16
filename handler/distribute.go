@@ -33,11 +33,13 @@ func BrowseFilesHandler(p *peer.Peer, t transport.Transport) http.HandlerFunc {
 			FileName    string `json:"file_name"`
 			FileSize    int    `json:"file_size"`
 			TotalChunks int    `json:"total_chunks"`
+			PeersCount  int    `json:"peers_count"`
 		}
 
 		selfAddr := fmt.Sprintf("localhost:%d", p.Port)
 		peers := registry.GetPeers()
-		var allFiles []PeerFile
+		
+		seenFiles := make(map[string]*PeerFile)
 
 		for _, peerAddr := range peers {
 			if peerAddr == selfAddr {
@@ -49,13 +51,23 @@ func BrowseFilesHandler(p *peer.Peer, t transport.Transport) http.HandlerFunc {
 				continue
 			}
 			for _, f := range files {
-				allFiles = append(allFiles, PeerFile{
-					PeerAddress: peerAddr,
-					FileName:    f.FileName,
-					FileSize:    f.FileSize,
-					TotalChunks: f.TotalChunks,
-				})
+				if existing, ok := seenFiles[f.FileName]; ok {
+					existing.PeersCount++
+				} else {
+					seenFiles[f.FileName] = &PeerFile{
+						PeerAddress: peerAddr,
+						FileName:    f.FileName,
+						FileSize:    f.FileSize,
+						TotalChunks: f.TotalChunks,
+						PeersCount:  1,
+					}
+				}
 			}
+		}
+
+		var allFiles []PeerFile
+		for _, pf := range seenFiles {
+			allFiles = append(allFiles, *pf)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -85,7 +97,7 @@ func DownloadHandler(p *peer.Peer, t transport.Transport) http.HandlerFunc {
 
 		// Use the downloader
 		downloader := peer.NewDownloader(p, t)
-		data, err := downloader.Download(fileName, peerAddr)
+		result, err := downloader.Download(fileName, peerAddr)
 		if err != nil {
 			log.Printf("[%s] Download failed for '%s' from %s: %v", p.PeerID, fileName, peerAddr, err)
 			http.Error(w, fmt.Sprintf("Download failed: %v", err), http.StatusInternalServerError)
@@ -100,19 +112,21 @@ func DownloadHandler(p *peer.Peer, t transport.Transport) http.HandlerFunc {
 		}
 
 		outPath := filepath.Join(downloadDir, fileName)
-		if err := os.WriteFile(outPath, data, 0644); err != nil {
+		if err := os.WriteFile(outPath, result.Data, 0644); err != nil {
 			http.Error(w, fmt.Sprintf("Failed to save file: %v", err), http.StatusInternalServerError)
 			return
 		}
 
-		log.Printf("[%s] Successfully downloaded '%s' (%d bytes) from %s", p.PeerID, fileName, len(data), peerAddr)
+		log.Printf("[%s] Successfully downloaded '%s' (%d bytes) using %d peers", p.PeerID, fileName, len(result.Data), len(result.PeersUsed))
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"status":    "success",
-			"file_name": fileName,
-			"file_size": len(data),
-			"saved_to":  outPath,
+			"status":        "success",
+			"file_name":     fileName,
+			"file_size":     len(result.Data),
+			"saved_to":      outPath,
+			"chunk_sources": result.ChunkSources,
+			"peers_used":    result.PeersUsed,
 		})
 	}
 }
