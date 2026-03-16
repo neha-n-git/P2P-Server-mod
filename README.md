@@ -43,6 +43,7 @@ p2p-server/
 │   └── index.html        # Frontend upload form
 └── README.md
 ```
+![P2P Sample](p2p.png)
 
 ---
 
