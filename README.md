@@ -6,7 +6,6 @@
   
   [![Go Version](https://img.shields.io/badge/Go-1.21%2B-00ADD8?style=flat&logo=go)](https://go.dev/)
 </div>
----
 
 ## 📖 Overview & Inspiration
 
@@ -17,7 +16,7 @@ Unlike traditional client-server models, this system has no central server dicta
 <p align="center">
   <img src="screenshots/p2p.png" alt="P2P Server Logo" width="240" />
 </p>
----
+
 
 ## ✨ Key Features
 
