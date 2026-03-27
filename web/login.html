@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — P2P Network</title>
+    <meta name="description" content="Authenticate to access the P2P File Sharing Network">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #E4568B;
+            --secondary: #5D7B3D;
+            --accent: #F6C94D;
+            --background: #A7C7E4;
+            --soft-accent: #F29BB9;
+            --text-dark: #2A2A2A;
+            --page-bg: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --glass-border: rgba(167, 199, 228, 0.4);
+            --input-bg: #f8fafc;
+            --input-border: #e2e8f0;
+            --input-focus: var(--primary);
+            --error-bg: rgba(228, 86, 139, 0.1);
+            --error-border: rgba(228, 86, 139, 0.4);
+            --success-bg: rgba(93, 123, 61, 0.1);
+            --success-border: rgba(93, 123, 61, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: url("/image.png") center/cover no-repeat fixed;
+            color: var(--text-dark);
+            -webkit-font-smoothing: antialiased;
+            padding: 1.5rem;
+        }
+
+        /* ── Glassmorphism Card ── */
+        .login-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            border: 2px solid var(--glass-border);
+            box-shadow:
+                0 24px 48px rgba(93, 123, 61, 0.08),
+                0 8px 16px rgba(228, 86, 139, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            max-width: 460px;
+            width: 100%;
+            overflow: hidden;
+            animation: cardSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardSlideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ── Header ── */
+        .card-header {
+            text-align: center;
+            padding: 2.5rem 2.5rem 0;
+        }
+
+        .logo-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 68px;
+            height: 68px;
+            background: linear-gradient(135deg, var(--primary), var(--soft-accent));
+            border-radius: 20px;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 8px 24px rgba(228, 86, 139, 0.25);
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { box-shadow: 0 8px 24px rgba(228, 86, 139, 0.25); }
+            50% { box-shadow: 0 8px 32px rgba(228, 86, 139, 0.4); }
+        }
+
+        .logo-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .card-header h1 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--secondary);
+            margin-bottom: 0.35rem;
+            letter-spacing: -0.02em;
+        }
+
+        .card-header p {
+            color: var(--secondary);
+            opacity: 0.7;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        /* ── Tab Switcher ── */
+        .tab-switcher {
+            display: flex;
+            margin: 1.75rem 2.5rem 0;
+            background: var(--input-bg);
+            border-radius: 14px;
+            padding: 4px;
+            position: relative;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.7rem;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--secondary);
+            opacity: 0.6;
+            cursor: pointer;
+            border-radius: 11px;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tab-btn.active {
+            color: white;
+            opacity: 1;
+        }
+
+        .tab-slider {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            background: linear-gradient(135deg, var(--primary), var(--soft-accent));
+            border-radius: 11px;
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 12px rgba(228, 86, 139, 0.3);
+        }
+
+        .tab-slider.register {
+            transform: translateX(100%);
+        }
+
+        /* ── Form ── */
+        .form-body {
+            padding: 1.75rem 2.5rem 2.5rem;
+            position: relative;
+            min-height: 300px;
+        }
+
+        .form-panel {
+            display: none;
+            animation: formFadeIn 0.35s ease-out;
+        }
+
+        .form-panel.active {
+            display: block;
+        }
+
+        @keyframes formFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            margin-bottom: 1.1rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-bottom: 0.4rem;
+            letter-spacing: 0.01em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            background: var(--input-bg);
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--input-focus);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(228, 86, 139, 0.1);
+        }
+
+        .input-group input::placeholder {
+            color: #a0aec0;
+            font-weight: 500;
+        }
+
+        .input-group .hint {
+            font-size: 0.78rem;
+            color: var(--secondary);
+            opacity: 0.6;
+            margin-top: 0.3rem;
+            font-weight: 600;
+        }
+
+        .network-pw-group {
+            background: rgba(167, 199, 228, 0.15);
+            border: 2px dashed var(--background);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .network-pw-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .network-pw-group label svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--primary);
+            fill: none;
+            stroke-width: 2.5;
+        }
+
+        .network-pw-group input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 2px solid rgba(228, 86, 139, 0.2);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            background: white;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .network-pw-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(228, 86, 139, 0.1);
+        }
+
+        /* ── Submit Button ── */
+        .submit-btn {
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 14px;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--soft-accent));
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(228, 86, 139, 0.3);
+            margin-top: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(228, 86, 139, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 4px 12px rgba(228, 86, 139, 0.2);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn .btn-loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .submit-btn.loading .btn-text { display: none; }
+        .submit-btn.loading .btn-loading { display: flex; }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ── Status Messages ── */
+        .status-msg {
+            margin-top: 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-align: center;
+            display: none;
+            animation: statusFadeIn 0.3s ease-out;
+        }
+
+        @keyframes statusFadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status-msg.error {
+            display: block;
+            background: var(--error-bg);
+            color: var(--primary);
+            border: 2px solid var(--error-border);
+        }
+
+        .status-msg.success {
+            display: block;
+            background: var(--success-bg);
+            color: var(--secondary);
+            border: 2px solid var(--success-border);
+        }
+
+        /* ── Footer ── */
+        .card-footer {
+            text-align: center;
+            padding: 0 2.5rem 2rem;
+            font-size: 0.82rem;
+            color: var(--secondary);
+            opacity: 0.55;
+            font-weight: 600;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .login-card { border-radius: 20px; }
+            .card-header { padding: 2rem 1.5rem 0; }
+            .tab-switcher { margin: 1.5rem 1.5rem 0; }
+            .form-body { padding: 1.5rem; }
+            .card-footer { padding: 0 1.5rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <!-- Header -->
+        <div class="card-header">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="5" r="2"/>
+                    <circle cx="5" cy="19" r="2"/>
+                    <circle cx="19" cy="19" r="2"/>
+                    <line x1="12" y1="7" x2="5" y2="17"/>
+                    <line x1="12" y1="7" x2="19" y2="17"/>
+                    <line x1="5" y1="19" x2="19" y2="19"/>
+                </svg>
+            </div>
+            <h1>P2P Network</h1>
+            <p>Authenticate to access the file sharing swarm</p>
+        </div>
+
+        <!-- Tab Switcher -->
+        <div class="tab-switcher">
+            <div class="tab-slider" id="tabSlider"></div>
+            <button class="tab-btn active" id="loginTab" onclick="switchTab('login')">Sign In</button>
+            <button class="tab-btn" id="registerTab" onclick="switchTab('register')">Register</button>
+        </div>
+
+        <!-- Forms -->
+        <div class="form-body">
+            <!-- Login Form -->
+            <form class="form-panel active" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" name="username" placeholder="Enter your username" autocomplete="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="submit-btn" id="loginBtn">
+                    <span class="btn-text">Sign In to Network</span>
+                    <span class="btn-loading"><span class="spinner"></span> Authenticating...</span>
+                </button>
+                <div class="status-msg" id="loginStatus"></div>
+            </form>
+
+            <!-- Register Form -->
+            <form class="form-panel" id="registerForm" onsubmit="handleRegister(event)">
+                <div class="input-group">
+                    <label for="regUsername">Username</label>
+                    <input type="text" id="regUsername" name="username" placeholder="Choose a username" autocomplete="username" required minlength="2">
+                </div>
+                <div class="input-group">
+                    <label for="regDisplayName">Display Name</label>
+                    <input type="text" id="regDisplayName" name="display_name" placeholder="Your name on the network">
+                </div>
+                <div class="input-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" name="password" placeholder="Min. 6 characters" autocomplete="new-password" required minlength="6">
+                </div>
+                <div class="input-group">
+                    <label for="regConfirmPassword">Confirm Password</label>
+                    <input type="password" id="regConfirmPassword" name="confirm_password" placeholder="Re-enter your password" autocomplete="new-password" required>
+                </div>
+                <div class="network-pw-group">
+                    <label>
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        Network Password
+                    </label>
+                    <input type="password" id="regNetworkPw" name="network_password" placeholder="Required to join this P2P network">
+                    <p class="hint" style="margin-top: 0.35rem; font-size: 0.78rem; color: var(--primary); opacity: 0.7; font-weight: 600;">
+                        Ask your network administrator for this password
+                    </p>
+                </div>
+                <button type="submit" class="submit-btn" id="registerBtn">
+                    <span class="btn-text">Create Account & Join</span>
+                    <span class="btn-loading"><span class="spinner"></span> Creating Account...</span>
+                </button>
+                <div class="status-msg" id="registerStatus"></div>
+            </form>
+        </div>
+
+        <div class="card-footer">
+            Secure authentication powered by bcrypt encryption
+        </div>
+    </div>
+
+    <script>
+        // ── Tab Switching ──
+        function switchTab(tab) {
+            const slider = document.getElementById('tabSlider');
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            if (tab === 'login') {
+                slider.classList.remove('register');
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                loginForm.classList.add('active');
+                registerForm.classList.remove('active');
+            } else {
+                slider.classList.add('register');
+                registerTab.classList.add('active');
+                loginTab.classList.remove('active');
+                registerForm.classList.add('active');
+                loginForm.classList.remove('active');
+            }
+
+            // Clear status messages
+            document.getElementById('loginStatus').className = 'status-msg';
+            document.getElementById('registerStatus').className = 'status-msg';
+        }
+
+        // ── Login Handler ──
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const status = document.getElementById('loginStatus');
+            
+            btn.classList.add('loading');
+            btn.disabled = true;
+            status.className = 'status-msg';
+
+            const payload = {
+                username: document.getElementById('loginUsername').value.trim(),
+                password: document.getElementById('loginPassword').value
+            };
+
+            try {
+                const resp = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await resp.json();
+
+                if (resp.ok && data.status === 'ok') {
+                    status.className = 'status-msg success';
+                    status.textContent = `Welcome back, ${data.display_name}! Redirecting...`;
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/';
+                    }, 800);
+                } else {
+                    status.className = 'status-msg error';
+                    status.textContent = data.error || 'Authentication failed';
+                    btn.classList.remove('loading');
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                status.className = 'status-msg error';
+                status.textContent = 'Connection error: ' + err.message;
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // ── Register Handler ──
+        async function handleRegister(e) {
+            e.preventDefault();
+            const btn = document.getElementById('registerBtn');
+            const status = document.getElementById('registerStatus');
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+            status.className = 'status-msg';
+
+            const password = document.getElementById('regPassword').value;
+            const confirmPw = document.getElementById('regConfirmPassword').value;
+
+            if (password !== confirmPw) {
+                status.className = 'status-msg error';
+                status.textContent = 'Passwords do not match';
+                btn.classList.remove('loading');
+                btn.disabled = false;
+                return;
+            }
+
+            const payload = {
+                username: document.getElementById('regUsername').value.trim(),
+                display_name: document.getElementById('regDisplayName').value.trim(),
+                password: password,
+                confirm_password: confirmPw,
+                network_password: document.getElementById('regNetworkPw').value
+            };
+
+            try {
+                const resp = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await resp.json();
+
+                if (resp.ok && data.status === 'registered') {
+                    status.className = 'status-msg success';
+                    status.innerHTML = `Account created successfully, ${data.display_name}! 🎉<br><a href="#" onclick="switchTab('login'); return false;" style="color: var(--primary); font-weight: 800; text-decoration: underline;">Click here to Sign In</a>`;
+                    btn.classList.remove('loading');
+                    btn.disabled = false;
+                } else {
+                    status.className = 'status-msg error';
+                    status.textContent = data.error || 'Registration failed';
+                    btn.classList.remove('loading');
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                status.className = 'status-msg error';
+                status.textContent = 'Connection error: ' + err.message;
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

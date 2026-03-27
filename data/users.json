@@ -1,0 +1,26 @@
+{
+  "Cath": {
+    "username": "Cath",
+    "display_name": "Cath",
+    "password_hash": "$2a$10$mIn2FARuXq0AUNHq0/ov2eWnvDYbD2eIgHa/mK.1fxhOTjPeO6JMC",
+    "created_at": "2026-03-27T10:06:27+05:30"
+  },
+  "Daphne": {
+    "username": "Daphne",
+    "display_name": "Daph",
+    "password_hash": "$2a$10$0GUDtlhTYtfws.a5HWXYku9n/8oYJ8YllJKgsPeJNcjqKcZhnc1Nu",
+    "created_at": "2026-03-27T10:14:58+05:30"
+  },
+  "testuser": {
+    "username": "testuser",
+    "display_name": "Test User",
+    "password_hash": "$2a$10$NscjZ6EUrFUXn1..FY/OQOaYQxcKD219aQD0KPxinc5yfyHu/HhXi",
+    "created_at": "2026-03-27T10:00:02+05:30"
+  },
+  "testuser2": {
+    "username": "testuser2",
+    "display_name": "Test User",
+    "password_hash": "$2a$10$4IxZQCDaJ7eht9gNni00B.cQJ5wehUCzzfzS.HgXY4oHPauskuyDa",
+    "created_at": "2026-03-27T10:01:52+05:30"
+  }
+}

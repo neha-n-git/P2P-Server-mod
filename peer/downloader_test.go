@@ -105,8 +105,8 @@ func TestDownloader_ConcurrentDownload(t *testing.T) {
 		t.Fatalf("Download failed: %v", err)
 	}
 
-	if !bytes.Equal(result, originalData) {
-		t.Errorf("downloaded data mismatch: got %d bytes, want %d bytes", len(result), len(originalData))
+	if !bytes.Equal(result.Data, originalData) {
+		t.Errorf("downloaded data mismatch: got %d bytes, want %d bytes", len(result.Data), len(originalData))
 	}
 }
 

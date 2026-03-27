@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
+	"p2p/auth"
 	"p2p/handler"
 	"p2p/peer"
 	"p2p/registry"
@@ -17,66 +19,87 @@ func main() {
 	port := flag.Int("port", 8080, "Port to listen on")
 	peerName := flag.String("name", "peer1", "Name of the peer")
 	peersList := flag.String("peers", "", "Comma-separated list of known peer addresses (e.g., localhost:8081)")
+	networkPassword := flag.String("network-password", "", "Shared password for P2P network authentication (peers must provide this to join)")
 	flag.Parse()
 
+	// ── Initialize Peer ──
 	p := peer.NewPeer(*peerName, *port)
+	t := transport.NewHTTPTransport(*networkPassword)
 
-	t := transport.NewHTTPTransport()
+	// ── Initialize Auth System ──
+	userStore, err := auth.NewUserStore("data")
+	if err != nil {
+		log.Fatalf("Failed to initialize user store: %v", err)
+	}
 
+	sessionMgr := auth.NewSessionManager(24 * time.Hour)
+	networkAuth := auth.NewNetworkAuth(*networkPassword)
+
+	// ── Peer Discovery ──
 	if *peersList != "" {
 		selfAddr := fmt.Sprintf("localhost:%d", *port)
 
-		// Collect peers from comma-separated flag value
 		allPeerAddrs := strings.Split(*peersList, ",")
-
-		// Also include any remaining positional args as peers
-		// (supports: -peers localhost:8080 localhost:8081)
 		allPeerAddrs = append(allPeerAddrs, flag.Args()...)
 
+		// Launch peer registration concurrently using goroutines
 		for _, peerAddr := range allPeerAddrs {
 			addr := strings.TrimSpace(peerAddr)
 			if addr == "" {
 				continue
 			}
 			registry.AddPeer(addr)
-			// Attempt to register ourselves with the remote peer
-			if err := t.RegisterWithPeer(addr, selfAddr); err != nil {
-				log.Printf("[%s] Warning: could not register with peer %s: %v", p.PeerID, addr, err)
-			} else {
-				log.Printf("[%s] Registered with peer %s", p.PeerID, addr)
-			}
+
+			// Register with each peer concurrently
+			go func(address string) {
+				if err := t.RegisterWithPeer(address, selfAddr); err != nil {
+					log.Printf("[%s] Warning: could not register with peer %s: %v", p.PeerID, address, err)
+				} else {
+					log.Printf("[%s] Registered with peer %s", p.PeerID, address)
+				}
+			}(addr)
 		}
 	}
 
 	fmt.Printf("Starting Peer '%s' on port %d\n", p.PeerID, p.Port)
 
-	// Setup Routes — Web Pages
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "web/home.html")
-	})
-	http.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "web/upload.html")
-	})
-	http.HandleFunc("/download", handler.DownloadPageHandler())
+	// ── Auth Routes (unprotected) ──
+	http.HandleFunc("/login", handler.LoginPageHandler())
+	http.HandleFunc("/api/auth/login", handler.AuthLoginHandler(userStore, sessionMgr))
+	http.HandleFunc("/api/auth/register", handler.AuthRegisterHandler(userStore, sessionMgr, networkAuth))
+	http.HandleFunc("/api/auth/logout", handler.AuthLogoutHandler(sessionMgr))
+	http.HandleFunc("/api/auth/status", handler.AuthStatusHandler(userStore, sessionMgr))
+
+	// ── Static Assets (unprotected) ──
 	http.HandleFunc("/image.png", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "web/image.png")
 	})
 
-	// Setup Routes — File Operations
-	http.HandleFunc("/api/upload", handler.UploadHandler(p))
+	// ── Protected Web Pages ──
+	http.HandleFunc("/", auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/home.html")
+	}, sessionMgr))
+	http.HandleFunc("/upload", auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/upload.html")
+	}, sessionMgr))
+	http.HandleFunc("/download", auth.RequireAuth(handler.DownloadPageHandler(), sessionMgr))
 
-	// Setup Routes — P2P API (JSON-based)
-	http.HandleFunc("/api/register", handler.RegisterHandler(p))
+	// ── Protected File Operations ──
+	http.HandleFunc("/api/upload", auth.RequireAuth(handler.UploadHandler(p), sessionMgr))
+
+	// ── Protected P2P API ──
+	http.HandleFunc("/api/register", handler.RegisterPeerHandler(p, networkAuth))
 	http.HandleFunc("/api/files", handler.FileListHandler(p))
 	http.HandleFunc("/api/filemeta", handler.FileMetaHandler(p))
 	http.HandleFunc("/api/chunk", handler.ChunkHandler(p))
 
-	// Setup Routes — Download Operations
-	http.HandleFunc("/api/browse", handler.BrowseFilesHandler(p, t))
-	http.HandleFunc("/api/download", handler.DownloadHandler(p, t))
+	// ── Protected Download Operations ──
+	http.HandleFunc("/api/browse", auth.RequireAuth(handler.BrowseFilesHandler(p, t), sessionMgr))
+	http.HandleFunc("/api/download", auth.RequireAuth(handler.DownloadHandler(p, t), sessionMgr))
 
-	// Start Server
+	// ── Start Server ──
 	addr := fmt.Sprintf(":%d", *port)
 	log.Printf("[%s] Server listening on %s", p.PeerID, addr)
+	log.Printf("[%s] Login at http://localhost:%d/login", p.PeerID, *port)
 	log.Fatal(http.ListenAndServe(addr, nil))
 }

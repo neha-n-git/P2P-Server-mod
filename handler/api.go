@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"p2p/auth"
 	"p2p/peer"
 	"p2p/registry"
 )
 
-// RegisterHandler handles incoming peer registration requests.
-// Remote peers POST their address here so we can add them to our local registry.
-func RegisterHandler(p *peer.Peer) http.HandlerFunc {
+// RegisterPeerHandler handles incoming peer registration requests.
+// Remote peers POST their address and network password here so we can
+// add them to our local registry after validating the network password.
+func RegisterPeerHandler(p *peer.Peer, na *auth.NetworkAuth) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -19,7 +21,8 @@ func RegisterHandler(p *peer.Peer) http.HandlerFunc {
 		}
 
 		var payload struct {
-			Address string `json:"address"`
+			Address         string `json:"address"`
+			NetworkPassword string `json:"network_password"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
@@ -29,6 +32,13 @@ func RegisterHandler(p *peer.Peer) http.HandlerFunc {
 
 		if payload.Address == "" {
 			http.Error(w, "Address field is required", http.StatusBadRequest)
+			return
+		}
+
+		// Validate network password using bcrypt comparison
+		if !na.ValidateNetworkPassword(payload.NetworkPassword) {
+			log.Printf("[%s] Rejected peer registration from %s — invalid network password", p.PeerID, payload.Address)
+			http.Error(w, "Invalid network password — access denied", http.StatusForbidden)
 			return
 		}
 

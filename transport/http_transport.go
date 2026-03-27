@@ -15,21 +15,27 @@ import (
 // for serialization. This allows the communication mechanism to be replaced
 // in the future without changing the core peer logic.
 type HTTPTransport struct {
-	Client *http.Client
+	Client          *http.Client
+	NetworkPassword string // shared password for P2P network authentication
 }
 
 // NewHTTPTransport creates a new HTTPTransport with sensible defaults.
-func NewHTTPTransport() *HTTPTransport {
+func NewHTTPTransport(networkPassword string) *HTTPTransport {
 	return &HTTPTransport{
 		Client: &http.Client{
 			Timeout: 30 * time.Second,
 		},
+		NetworkPassword: networkPassword,
 	}
 }
 
 // RegisterWithPeer sends a JSON-encoded registration request to a remote peer.
+// Includes the network password for authentication.
 func (t *HTTPTransport) RegisterWithPeer(peerAddress string, selfAddress string) error {
-	payload := map[string]string{"address": selfAddress}
+	payload := map[string]string{
+		"address":          selfAddress,
+		"network_password": t.NetworkPassword,
+	}
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("failed to marshal registration payload: %w", err)

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload File - P2P Network</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #E4568B;
@@ -26,7 +27,39 @@
             background: url("/image.png") center/cover no-repeat fixed;
             color: var(--text-dark);
             padding: 2rem;
+            padding-top: 4rem;
             -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── User Top Bar ── */
+        .user-bar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0.6rem 1.5rem;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 2px solid var(--background);
+            z-index: 100;
+            gap: 0.75rem;
+            box-shadow: 0 2px 8px rgba(93,123,61,0.06);
+        }
+        .user-bar .user-name { font-weight: 800; color: var(--secondary); font-size: 0.9rem; }
+        .user-bar .user-avatar {
+            width: 32px; height: 32px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--soft-accent));
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 800; font-size: 0.85rem;
+        }
+        .user-bar .logout-btn {
+            background: var(--primary); color: white; border: none;
+            padding: 0.4rem 1rem; font-family: inherit; font-size: 0.8rem;
+            font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .user-bar .logout-btn:hover { background: var(--accent); color: var(--text-dark);
         }
 
         .container {
@@ -161,6 +194,13 @@
     </style>
 </head>
 <body>
+    <!-- User Bar -->
+    <div class="user-bar" id="userBar" style="display: none;">
+        <div class="user-avatar" id="userAvatar"></div>
+        <span class="user-name" id="userName"></span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
     <div class="container">
         <nav><a href="/">← Return to Dashboard</a></nav>
         <h1>Upload File</h1>
@@ -207,6 +247,24 @@
                 statusDiv.textContent = 'Connection Error: ' + err.message;
             }
         };
+    </script>
+    <script>
+        async function loadUser() {
+            try {
+                const resp = await fetch('/api/auth/status');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    document.getElementById('userName').textContent = data.display_name || data.username;
+                    document.getElementById('userAvatar').textContent = (data.display_name || data.username).charAt(0).toUpperCase();
+                    document.getElementById('userBar').style.display = 'flex';
+                }
+            } catch(e) {}
+        }
+        async function logout() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login';
+        }
+        loadUser();
     </script>
 </body>
 </html>
