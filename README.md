@@ -1,137 +1,145 @@
-# P2P File Sharing System
+<div align="center">
+  <img src="screenshots/p2p.png" alt="P2P Server Logo" width="120" />
 
-A BitTorrent-inspired peer-to-peer file sharing simulation built in Go. Multiple instances of the application act as independent peers, each capable of sending and receiving files by dividing them into chunks and distributing them across the network.
-
----
-
-## Overview
-
-In this P2P simulation, there is no central server. Each peer acts as both a client and a server, exchanging file chunks directly with other peers. The system demonstrates core distributed file sharing concepts including chunk-based transfer, peer discovery, and concurrent downloads.
-
----
-
-## Features
-
-- File upload via web interface, processed as a byte stream and split into fixed-size chunks
-- Chunk integrity verification using hashes
-- Peer discovery and registration across the network
-- Concurrent chunk downloads from multiple peers in parallel
-- File reconstruction from received chunks in correct order
-- Basic load balancing across available peers
-- JSON-based peer communication for interoperability
-- Graceful error handling for network interruptions and incomplete transfers
+  # P2P File Sharing System
+  
+  **A BitTorrent-inspired peer-to-peer file sharing simulation built in Go.**
+  
+  [![Go Version](https://img.shields.io/badge/Go-1.21%2B-00ADD8?style=flat&logo=go)](https://go.dev/)
+  [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+</div>
 
 ---
 
-## Architecture
+## 📖 Overview & Inspiration
 
-```
+This project is a decentralized **Peer-to-Peer (P2P) file sharing simulation** heavily inspired by the core mechanics of the **BitTorrent** protocol. 
+
+Unlike traditional client-server models, this system has no central server dictating file distribution. Every instance of the application acts as an independent "peer" (both client and server). When a file is uploaded to the swarm, it is divided into fixed-size chunks, hashed for integrity, and distributed across the network. When downloading, a peer requests chunks from multiple connected nodes simultaneously, maximizing bandwidth and demonstrating core distributed systems concepts in action.
+
+---
+
+## ✨ Key Features
+
+- **Decentralized Architecture:** True P2P networking where peers discover, register, and communicate with each other directly.
+- **Chunk-Based File Transfer:** Files are split into fixed-size byte chunks before transmission to enable distributed, piecemeal sharing.
+- **Concurrent Downloads:** Utilizes Go's powerful concurrency primitives (goroutines and channels) to download multiple chunks from different peers in parallel.
+- **Data Integrity:** Each chunk is cryptographically hashed to ensure payloads are not corrupted or tampered with during transit.
+- **Smart Load Balancing:** Network load is distributed quickly across all available peers holding the required chunks.
+- **Secure Authentication:** Built-in user login system utilizing `bcrypt` password hashing and secure session tokens.
+- **Resilient Reconstruction:** Chunks are acquired out-of-order and seamlessly reconstructed into the final file locally.
+
+---
+
+## 📸 Screenshots
+
+Here is a look at the web interface and features in action:
+
+<details>
+<summary><b>1. User Authentication (Login/Register)</b></summary>
+<br>
+<img src="screenshots/Login.png" alt="Login Screen" width="800"/>
+</details>
+
+<details>
+<summary><b>2. Uploading Files to the Swarm</b></summary>
+<br>
+<img src="screenshots/Upload.png" alt="Upload Interface" width="800"/>
+</details>
+
+<details>
+<summary><b>3. Viewing and Downloading Shared Files</b></summary>
+<br>
+<img src="screenshots/Download.png" alt="Download Interface" width="800"/>
+</details>
+
+<details>
+<summary><b>4. Concurrent Load Balancing in Action</b></summary>
+<br>
+<img src="screenshots/Download-loadbalancing.png" alt="Load Balancing" width="800"/>
+</details>
+
+---
+
+## ⚙️ How It Works
+
+The lifecycle of a file in the P2P network follows these core steps:
+
+1. **Upload Phase**
+   A user selects a file via the web frontend. The backend reads the file as a byte stream and splits it into fixed-size blocks (chunks). A unique cryptographic hash is generated for each chunk.
+2. **Peer Registration & Discovery**
+   Each time a node spins up, it registers itself with other known nodes, sharing its address, port, and a catalog of files it currently holds.
+3. **Distribution**
+   The network continually iterates over connected peers, gossiping chunk data so that redundancy is established across the overlay network.
+4. **Concurrent Download**
+   When a node requests a file, it queries the network for chunk availability. It then spawns multiple Goroutines to pull different chunks concurrently from various peers.
+5. **Reconstruction**
+   Once all constituent chunks are acquired and their hashes verified, the blocks are perfectly stitched back together sequentially to rebuild the original file.
+
+---
+
+## 🏗️ Architecture Stack
+
+```text
 p2p-server/
-├── main.go               # Entry point, HTTP server setup
-├── peer/
-│   ├── peer.go           # Peer struct, registration, identity
-│   └── peer_test.go      # Unit tests for peer logic
-├── file/
-│   ├── file.go           # File splitting, chunk generation, reconstruction
-│   └── file_test.go      # Unit tests for file operations
-├── chunk/
-│   ├── chunk.go          # Chunk struct, hash verification
-│   └── chunk_test.go     # Unit tests for chunk integrity
-├── transfer/
-│   └── transfer.go       # Peer communication interface, chunk transfer logic
-├── static/
-│   └── index.html        # Frontend upload form
-└── README.md
+├── main.go               # Entry point, CLI flags, and HTTP listener
+├── peer/                 # Peer identity, registration, network discovery
+├── file/                 # File operations (splitting, metadata, reconstruction)
+├── chunk/                # Chunk definition and cryptographic hash verification
+├── transport/            # Peer communication logic (HTTP/TCP implementations)
+├── auth/                 # Secure user authentication and session management
+├── handler/              # HTTP Request handlers and controllers
+└── web/                  # HTML/CSS/JS frontend assets
 ```
-![P2P Sample](p2p.png)
 
 ---
 
-## Key Concepts Implemented
-
-| Concept | Usage |
-|---|---|
-| Variables & data types | Peer identity, port, file size, chunk count, chunk size |
-| Arrays | Fixed-size chunk hash storage |
-| Slices | Dynamic storage of file chunks and connected peers |
-| Structs | `Peer`, `File`, and `Chunk` types representing real-world components |
-| Maps | File-to-peer mapping and chunk availability records |
-| Functions | File upload, chunk generation, peer communication, file reconstruction |
-| Interfaces | Modular peer communication abstraction |
-| Pointers | Reference-based state updates for peer info and transfer progress |
-| Control structures | Decision flows for peer existence checks, success/failure handling |
-| Loops | Iterating over file data to generate chunks and over peers to distribute them |
-| Error handling | Network interruptions, incomplete transfers, missing peers |
-| JSON marshalling | Serialization of peer registration, file metadata, chunk info |
-| Goroutines & channels | Concurrent chunk downloads from multiple peers in parallel |
-| Unit testing | Validation of file splitting, chunk integrity, and metadata processing |
-
----
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Go 1.21 or higher
-- A modern web browser
+- [Go 1.21+](https://go.dev/dl/) installed locally.
+- A modern web browser.
 
-### Running a peer instance
+### Running a Local Network Simulation
+
+To see the P2P distribution in action, you should spin up multiple peers locally:
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/p2p-server.git
-cd p2p-server
+# 1. Clone the repository
+git clone https://github.com/your-username/P2P-Server.git
+cd P2P-Server-mod
 
-# Run the first peer on port 8080
+# 2. Run the first peer (Alpha node) on port 8080
 go run main.go --port 8080
 
-# Run a second peer on port 8081 (in a new terminal)
+# 3. Open a second terminal and run a new peer on port 8081
 go run main.go --port 8081
 
-# Run a third peer on port 8082 (in a new terminal)
+# 4. Open a third terminal and run another peer on port 8082
 go run main.go --port 8082
 ```
 
-Open `http://localhost:8080` in your browser to access the upload interface.
-
-### Running tests
-
-```bash
-go test ./...
-```
+Navigate to `http://localhost:8080` in your browser. Upload a file on the first node, switch to `http://localhost:8081`, and download it to watch the swarm orchestrate the transfer!
 
 ---
 
-## How It Works
+## 📡 API Endpoints
 
-1. **Upload** — A user selects a file via the web form. The backend reads it as a byte stream and splits it into fixed-size chunks. Each chunk is hashed for integrity verification.
-
-2. **Peer registration** — Each peer registers itself with other known peers, sharing its address, port, and the list of files it holds.
-
-3. **Distribution** — The system iterates over available peers and distributes chunks across the network.
-
-4. **Download** — When a peer requests a file, it queries the network for chunk availability. Multiple chunks are downloaded concurrently from different peers using goroutines, with a channel collecting results.
-
-5. **Reconstruction** — Once all chunks are received, they are reassembled in the correct order to reconstruct the original file.
-
-   
-
----
-
-## API Endpoints
+The system exposes a RESTful interface for peer-to-peer communication and frontend interactions:
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/upload` | Upload a file and split into chunks |
-| `GET` | `/peers` | List all registered peers |
-| `POST` | `/register` | Register a new peer |
-| `GET` | `/chunks/:fileID` | Get chunk availability for a file |
-| `GET` | `/download/:fileID` | Download and reconstruct a file |
+| `POST` | `/api/upload` | Upload a file and split it into chunks |
+| `GET` | `/api/peers` | List all actively connected peers in the local registry |
+| `POST` | `/api/register` | Discover and register a new peer in the swarm |
+| `GET` | `/api/download/:fileID`| Download and perfectly reconstruct a shared file |
+| `POST` | `/auth/login` | Authenticate a user to join the network |
 
 ---
 
-## Notes
+## 📝 Design Notes
 
-- This is a simulation and does not implement the full BitTorrent protocol (no tracker, no `.torrent` files, no DHT).
-- Peers must be running on the same machine or local network for discovery to work without additional configuration.
-- Chunk size and peer list are configurable via environment variables or flags.
+- **Simulation Bounds:** This is a programmatic architectural simulation of BitTorrent. It does not perfectly implement legacy Trackers, `.torrent` metadata files, or a Distributed Hash Table (DHT).
+- **Network Scope:** In its default configuration, peers communicate primarily via Localhost or LAN. Cloud deployments require configured public IPs/Ports.
+- **Configurability:** Chunk sizes, networking protocols, authentication requirements, and peer timeouts can be tweaked within the source code (`main.go`).

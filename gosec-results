@@ -1,0 +1,428 @@
+{
+	"Golang errors": {},
+	"Issues": [
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint32",
+			"file": "D:\\Projects\\P2P-Server-mod\\transport\\protocol.go",
+			"code": "52: \theader[0] = msgType\n53: \tbinary.BigEndian.PutUint32(header[1:5], uint32(len(payload)))\n54: \n",
+			"line": "53",
+			"column": "48",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G703",
+			"details": "Path traversal via taint analysis",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\distribute.go",
+			"code": "125: \t\toutPath := filepath.Join(downloadDir, fileName)\n126: \t\tif err := os.WriteFile(outPath, result.Data, 0644); err != nil {\n127: \t\t\thttp.Error(w, fmt.Sprintf(\"Failed to save file: %v\", err), http.StatusInternalServerError)\n",
+			"line": "126",
+			"column": "25",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "614",
+				"url": "https://cwe.mitre.org/data/definitions/614.html"
+			},
+			"rule_id": "G124",
+			"details": "http.Cookie missing or has insecure Secure, HttpOnly, or SameSite attribute",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\auth_handler.go",
+			"code": "154: \t\t// Clear the cookie\n155: \t\thttp.SetCookie(w, \u0026http.Cookie{\n156: \t\t\tName:     \"session_token\",\n",
+			"line": "155",
+			"column": "33",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "614",
+				"url": "https://cwe.mitre.org/data/definitions/614.html"
+			},
+			"rule_id": "G124",
+			"details": "http.Cookie missing or has insecure Secure, HttpOnly, or SameSite attribute",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\auth_handler.go",
+			"code": "57: \t\t// Set session cookie\n58: \t\thttp.SetCookie(w, \u0026http.Cookie{\n59: \t\t\tName:     \"session_token\",\n",
+			"line": "58",
+			"column": "33",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "614",
+				"url": "https://cwe.mitre.org/data/definitions/614.html"
+			},
+			"rule_id": "G124",
+			"details": "http.Cookie missing or has insecure Secure, HttpOnly, or SameSite attribute",
+			"file": "D:\\Projects\\P2P-Server-mod\\auth\\middleware.go",
+			"code": "20: \t\t\t// Clear the invalid cookie\n21: \t\t\thttp.SetCookie(w, \u0026http.Cookie{\n22: \t\t\t\tName:   \"session_token\",\n",
+			"line": "21",
+			"column": "34",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "79",
+				"url": "https://cwe.mitre.org/data/definitions/79.html"
+			},
+			"rule_id": "G705",
+			"details": "XSS via taint analysis",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\upload.go",
+			"code": "74: \t\tw.WriteHeader(http.StatusOK)\n75: \t\tw.Write([]byte(fmt.Sprintf(\"File '%s' uploaded and split into %d chunks\", fileMeta.FileName, fileMeta.TotalChunks)))\n76: \t}\n",
+			"line": "75",
+			"column": "10",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "676",
+				"url": "https://cwe.mitre.org/data/definitions/676.html"
+			},
+			"rule_id": "G114",
+			"details": "Use of net/http serve function that has no support for setting timeouts",
+			"file": "D:\\Projects\\P2P-Server-mod\\main.go",
+			"code": "143: \t}\n144: \tlog.Fatal(http.ListenAndServe(addr, nil))\n145: }\n",
+			"line": "144",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "400",
+				"url": "https://cwe.mitre.org/data/definitions/400.html"
+			},
+			"rule_id": "G120",
+			"details": "Unbounded form parsing in HTTP handlers can cause memory exhaustion",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\upload.go",
+			"code": "19: \t\t// 1. Parse Multipart Form\n20: \t\terr := r.ParseMultipartForm(10 \u003c\u003c 20) // 10 MB limit\n21: \t\tif err != nil {\n",
+			"line": "20",
+			"column": "30",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\distribute.go",
+			"code": "119: \t\tdownloadDir := \"downloads\"\n120: \t\tif err := os.MkdirAll(downloadDir, 0755); err != nil {\n121: \t\t\thttp.Error(w, fmt.Sprintf(\"Failed to create download directory: %v\", err), http.StatusInternalServerError)\n",
+			"line": "120",
+			"column": "13",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "D:\\Projects\\P2P-Server-mod\\auth\\auth.go",
+			"code": "39: func NewUserStore(dataDir string) (*UserStore, error) {\n40: \tif err := os.MkdirAll(dataDir, 0755); err != nil {\n41: \t\treturn nil, fmt.Errorf(\"failed to create data directory: %w\", err)\n",
+			"line": "40",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G306",
+			"details": "Expect WriteFile permissions to be 0600 or less",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\distribute.go",
+			"code": "125: \t\toutPath := filepath.Join(downloadDir, fileName)\n126: \t\tif err := os.WriteFile(outPath, result.Data, 0644); err != nil {\n127: \t\t\thttp.Error(w, fmt.Sprintf(\"Failed to save file: %v\", err), http.StatusInternalServerError)\n",
+			"line": "126",
+			"column": "13",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G306",
+			"details": "Expect WriteFile permissions to be 0600 or less",
+			"file": "D:\\Projects\\P2P-Server-mod\\auth\\auth.go",
+			"code": "163: \n164: \tif err := os.WriteFile(s.filePath, data, 0644); err != nil {\n165: \t\treturn fmt.Errorf(\"failed to write users file: %w\", err)\n",
+			"line": "164",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "117",
+				"url": "https://cwe.mitre.org/data/definitions/117.html"
+			},
+			"rule_id": "G706",
+			"details": "Log injection via taint analysis",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\distribute.go",
+			"code": "130: \n131: \t\tlog.Printf(\"[%s] Successfully downloaded '%s' (%d bytes) using %d peers\", p.PeerID, fileName, len(result.Data), len(result.PeersUsed))\n132: \n",
+			"line": "131",
+			"column": "13",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "117",
+				"url": "https://cwe.mitre.org/data/definitions/117.html"
+			},
+			"rule_id": "G706",
+			"details": "Log injection via taint analysis",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\distribute.go",
+			"code": "112: \t\tif err != nil {\n113: \t\t\tlog.Printf(\"[%s] Download failed for '%s' from %s: %v\", p.PeerID, fileName, peerAddr, err)\n114: \t\t\thttp.Error(w, fmt.Sprintf(\"Download failed: %v\", err), http.StatusInternalServerError)\n",
+			"line": "113",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "117",
+				"url": "https://cwe.mitre.org/data/definitions/117.html"
+			},
+			"rule_id": "G706",
+			"details": "Log injection via taint analysis",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\api.go",
+			"code": "154: \t\tif _, err := w.Write(data); err != nil {\n155: \t\t\tlog.Printf(\"[%s] Error writing chunk data for hash '%s': %v\", p.PeerID, hashStr, err)\n156: \t\t}\n",
+			"line": "155",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "117",
+				"url": "https://cwe.mitre.org/data/definitions/117.html"
+			},
+			"rule_id": "G706",
+			"details": "Log injection via taint analysis",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\api.go",
+			"code": "122: \t\tif err := json.NewEncoder(w).Encode(meta); err != nil {\n123: \t\t\tlog.Printf(\"[%s] Error encoding file meta for '%s': %v\", p.PeerID, fileName, err)\n124: \t\t\thttp.Error(w, \"Internal server error\", http.StatusInternalServerError)\n",
+			"line": "123",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\upload.go",
+			"code": "74: \t\tw.WriteHeader(http.StatusOK)\n75: \t\tw.Write([]byte(fmt.Sprintf(\"File '%s' uploaded and split into %d chunks\", fileMeta.FileName, fileMeta.TotalChunks)))\n76: \t}\n",
+			"line": "75",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\distribute.go",
+			"code": "143: \t\tw.Header().Set(\"Content-Type\", \"application/json\")\n144: \t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n145: \t\t\t\"status\":        \"success\",\n146: \t\t\t\"file_name\":     fileName,\n147: \t\t\t\"file_size\":     len(result.Data),\n148: \t\t\t\"saved_to\":      outPath,\n149: \t\t\t\"chunk_sources\": result.ChunkSources,\n150: \t\t\t\"peers_used\":    result.PeersUsed,\n151: \t\t\t\"peer_names\":    peerNames,\n152: \t\t})\n153: \t}\n",
+			"line": "144-152",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\auth_handler.go",
+			"code": "210: \tw.WriteHeader(status)\n211: \tjson.NewEncoder(w).Encode(map[string]string{\"error\": message})\n212: }\n",
+			"line": "211",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\auth_handler.go",
+			"code": "198: \t\tw.Header().Set(\"Content-Type\", \"application/json\")\n199: \t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n200: \t\t\t\"username\":     user.Username,\n201: \t\t\t\"display_name\": user.DisplayName,\n202: \t\t\t\"created_at\":   user.CreatedAt,\n203: \t\t})\n204: \t}\n",
+			"line": "199-203",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\auth_handler.go",
+			"code": "164: \t\tw.Header().Set(\"Content-Type\", \"application/json\")\n165: \t\tjson.NewEncoder(w).Encode(map[string]string{\n166: \t\t\t\"status\":   \"ok\",\n167: \t\t\t\"redirect\": \"/login\",\n168: \t\t})\n169: \t}\n",
+			"line": "165-168",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\auth_handler.go",
+			"code": "127: \t\tw.Header().Set(\"Content-Type\", \"application/json\")\n128: \t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n129: \t\t\t\"status\":       \"registered\",\n130: \t\t\t\"username\":     payload.Username,\n131: \t\t\t\"display_name\": payload.DisplayName,\n132: \t\t})\n133: \t}\n",
+			"line": "128-132",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\auth_handler.go",
+			"code": "71: \t\tw.Header().Set(\"Content-Type\", \"application/json\")\n72: \t\tjson.NewEncoder(w).Encode(map[string]interface{}{\n73: \t\t\t\"status\":       \"ok\",\n74: \t\t\t\"redirect\":     \"/\",\n75: \t\t\t\"username\":     user.Username,\n76: \t\t\t\"display_name\": user.DisplayName,\n77: \t\t})\n78: \t}\n",
+			"line": "72-77",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\api.go",
+			"code": "69: \t\tw.Header().Set(\"Content-Type\", \"application/json\")\n70: \t\tjson.NewEncoder(w).Encode(map[string]string{\"name\": displayName})\n71: \t}\n",
+			"line": "70",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\Projects\\P2P-Server-mod\\handler\\api.go",
+			"code": "49: \t\tw.WriteHeader(http.StatusOK)\n50: \t\tjson.NewEncoder(w).Encode(map[string]string{\"status\": \"registered\"})\n51: \t}\n",
+			"line": "50",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "D:\\Projects\\P2P-Server-mod\\auth\\middleware.go",
+			"code": "41: \t\tw.WriteHeader(http.StatusUnauthorized)\n42: \t\tw.Write([]byte(`{\"error\": \"authentication required\"}`))\n43: \t\treturn\n",
+			"line": "42",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		}
+	],
+	"Stats": {
+		"files": 20,
+		"lines": 2220,
+		"nosec": 0,
+		"found": 26
+	},
+	"GosecVersion": "dev"
+}

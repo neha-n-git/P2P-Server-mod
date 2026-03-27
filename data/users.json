@@ -1,0 +1,20 @@
+{
+  "Beth": {
+    "username": "Beth",
+    "display_name": "Beth",
+    "password_hash": "$2a$10$hJkAp9w6xFk9GsipsC89/un216890vXleGzy0OBddvU2Kqk07QIQC",
+    "created_at": "2026-03-27T10:59:35+05:30"
+  },
+  "Jane": {
+    "username": "Jane",
+    "display_name": "Jane",
+    "password_hash": "$2a$10$1TdTM1AJY9Y0on/u56Fcw.PmxyUggOOb/FrRUNCUuk1PttqGQOUBm",
+    "created_at": "2026-03-27T11:18:05+05:30"
+  },
+  "Neha": {
+    "username": "Neha",
+    "display_name": "Neha",
+    "password_hash": "$2a$10$hI64DPCHGYx06xHbCFcfOOhNuO7wesp91eScMmHdGKZpeW0bbXH1m",
+    "created_at": "2026-03-27T11:20:56+05:30"
+  }
+}
