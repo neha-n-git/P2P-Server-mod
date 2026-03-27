@@ -13,6 +13,9 @@ type Transport interface {
 	// informing it of our address so it can communicate back.
 	RegisterWithPeer(peerAddress string, selfAddress string) error
 
+	// FetchPeerInfo retrieves the identity/name of a remote peer.
+	FetchPeerInfo(peerAddress string) (string, error)
+
 	// FetchFileList requests the list of available files from a remote peer.
 	FetchFileList(peerAddress string) ([]file.FileMeta, error)
 

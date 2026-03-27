@@ -341,7 +341,7 @@
                     card.innerHTML = `
                         <div class="file-info">
                             <strong>${f.file_name}</strong>
-                            <small>Size: ${formatSize(f.file_size)} &bull; Segments: ${f.total_chunks} &bull; Network Availability: ${f.peers_count} node(s)</small>
+                            <small>From: <strong>${f.peer_name}</strong> (${f.peer_address}) &bull; Size: ${formatSize(f.file_size)} &bull; Segments: ${f.total_chunks} &bull; Network Availability: ${f.peers_count} node(s)</small>
                         </div>
                         <button class="download-btn" onclick="downloadFile('${f.file_name}', '${f.peer_address}')">Retrieve</button>
                     `;
@@ -360,18 +360,19 @@
                 const data = await resp.json();
                 if (!resp.ok) throw new Error(data.error || JSON.stringify(data));
 
-                setStatus(`Success: File "${data.file_name}" (${formatSize(data.file_size)}) retrieved and assembled at ${data.saved_to}`, 'success');
-
-                // Show chunk source visualization
-                if (data.chunk_sources && data.chunk_sources.length > 0) {
-                    renderChunkDetails(data.chunk_sources, data.peers_used);
+                if (data.status === 'success') {
+                    setStatus(`Success: File "${data.file_name}" (${formatSize(data.file_size)}) retrieved and assembled at ${data.saved_to}`, 'success');
+                    renderChunkDetails(data.chunk_sources, data.peers_used, data.peer_names);
+                } else {
+                    // Handle other statuses or errors if needed, though the !resp.ok check above should catch most
+                    setStatus('Download failed: ' + (data.error || 'Unknown error'), 'error');
                 }
             } catch(err) {
                 setStatus('Download failed: ' + err.message, 'error');
             }
         }
 
-        function renderChunkDetails(chunkSources, peersUsed) {
+        function renderChunkDetails(chunkSources, peersUsed, peerNamesMap) {
             // Assign colors to peers
             const peerColorMap = {};
             peersUsed.forEach((p, i) => {
@@ -393,7 +394,8 @@
                 const pct = ((count / totalChunks) * 100).toFixed(0);
                 // Adjust text color if cell background relates to Golden Pollen or Evening Sky for better contrast
                 const tColor = (peerColorMap[p] === '#F6C94D' || peerColorMap[p] === '#A7C7E4') ? 'var(--text-dark)' : 'white';
-                summaryDiv.innerHTML += `<span class="peer-badge" style="background:${peerColorMap[p]}; color: ${tColor}">${p} &bull; ${count} segments (${pct}%)</span> `;
+                const displayName = peerNamesMap ? (peerNamesMap[p] || p) : p;
+                summaryDiv.innerHTML += `<span class="peer-badge" style="background:${peerColorMap[p]}; color: ${tColor}">${displayName} &bull; ${count} segments (${pct}%)</span> `;
             });
 
             // Load bar
@@ -409,7 +411,8 @@
                 seg.style.background = peerColorMap[p];
                 seg.style.color = (peerColorMap[p] === '#F6C94D' || peerColorMap[p] === '#A7C7E4') ? 'var(--text-dark)' : 'white';
                 seg.textContent = count > 0 ? count : '';
-                seg.title = `${p}: ${count} segments (${pct}%)`;
+                const displayName = peerNamesMap ? (peerNamesMap[p] || p) : p;
+                seg.title = `${displayName}: ${count} segments (${pct}%)`;
                 barInner.appendChild(seg);
             });
 
@@ -423,7 +426,8 @@
                 cell.style.background = peerColorMap[cs.peer_address];
                 cell.style.color = (peerColorMap[cs.peer_address] === '#F6C94D' || peerColorMap[cs.peer_address] === '#A7C7E4') ? 'var(--text-dark)' : 'white';
                 cell.textContent = cs.chunk_index;
-                cell.setAttribute('data-tooltip', `Index ${cs.chunk_index} — Node: ${cs.peer_address}`);
+                const displayName = peerNamesMap ? (peerNamesMap[cs.peer_address] || cs.peer_address) : cs.peer_address;
+                cell.setAttribute('data-tooltip', `Index ${cs.chunk_index} — Node: ${displayName}`);
                 gridDiv.appendChild(cell);
             });
 

@@ -13,6 +13,7 @@ type Peer struct {
 	ChunkMap         map[string][]ChunkLocation
 	ReceivedChunks   map[string]map[int][]byte // Temporary storage for reassembly: FileID -> Index -> Data
 	ChunkDataStorage map[string][]byte         // Storage for owned chunks: Hash -> Data
+	ActiveUser       string                    // Currently logged in user's display name
 	Mu               sync.Mutex                // For thread-safe updates
 }
 

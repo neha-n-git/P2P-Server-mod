@@ -63,11 +63,11 @@ func main() {
 
 	fmt.Printf("Starting Peer '%s' on port %d\n", p.PeerID, p.Port)
 
-	// ── Auth Routes (unprotected) ──
+	// ── Auth Pages & API ──
 	http.HandleFunc("/login", handler.LoginPageHandler())
-	http.HandleFunc("/api/auth/login", handler.AuthLoginHandler(userStore, sessionMgr))
+	http.HandleFunc("/api/auth/login", handler.AuthLoginHandler(p, userStore, sessionMgr))
 	http.HandleFunc("/api/auth/register", handler.AuthRegisterHandler(userStore, sessionMgr, networkAuth))
-	http.HandleFunc("/api/auth/logout", handler.AuthLogoutHandler(sessionMgr))
+	http.HandleFunc("/api/auth/logout", handler.AuthLogoutHandler(p, sessionMgr))
 	http.HandleFunc("/api/auth/status", handler.AuthStatusHandler(userStore, sessionMgr))
 
 	// ── Static Assets (unprotected) ──
@@ -89,6 +89,7 @@ func main() {
 
 	// ── Protected P2P API ──
 	http.HandleFunc("/api/register", handler.RegisterPeerHandler(p, networkAuth))
+	http.HandleFunc("/api/info", handler.PeerInfoHandler(p))
 	http.HandleFunc("/api/files", handler.FileListHandler(p))
 	http.HandleFunc("/api/filemeta", handler.FileMetaHandler(p))
 	http.HandleFunc("/api/chunk", handler.ChunkHandler(p))

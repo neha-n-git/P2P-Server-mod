@@ -21,6 +21,10 @@ func (m *mockTransport) RegisterWithPeer(peerAddress string, selfAddress string)
 	return nil
 }
 
+func (m *mockTransport) FetchPeerInfo(peerAddress string) (string, error) {
+	return "mock_" + peerAddress, nil
+}
+
 func (m *mockTransport) FetchFileList(peerAddress string) ([]file.FileMeta, error) {
 	files, ok := m.Files[peerAddress]
 	if !ok {

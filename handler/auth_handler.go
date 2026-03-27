@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"p2p/auth"
+	"p2p/peer"
 	"time"
 )
 
@@ -17,7 +18,7 @@ func LoginPageHandler() http.HandlerFunc {
 // AuthLoginHandler handles POST requests for user authentication.
 // Validates credentials against the UserStore using bcrypt,
 // creates a session on success, and sets a session cookie.
-func AuthLoginHandler(store *auth.UserStore, sm *auth.SessionManager) http.HandlerFunc {
+func AuthLoginHandler(p *peer.Peer, store *auth.UserStore, sm *auth.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -63,6 +64,10 @@ func AuthLoginHandler(store *auth.UserStore, sm *auth.SessionManager) http.Handl
 			SameSite: http.SameSiteLaxMode,
 		})
 
+		// Set the active user on this peer for P2P visibility
+		p.Mu.Lock()
+		p.ActiveUser = user.DisplayName
+		p.Mu.Unlock()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":       "ok",
@@ -129,7 +134,7 @@ func AuthRegisterHandler(store *auth.UserStore, sm *auth.SessionManager, na *aut
 }
 
 // AuthLogoutHandler handles POST requests to destroy the user session.
-func AuthLogoutHandler(sm *auth.SessionManager) http.HandlerFunc {
+func AuthLogoutHandler(p *peer.Peer, sm *auth.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -139,6 +144,11 @@ func AuthLogoutHandler(sm *auth.SessionManager) http.HandlerFunc {
 		cookie, err := r.Cookie("session_token")
 		if err == nil {
 			sm.DestroySession(cookie.Value)
+			
+			// Clear the active user on this peer
+			p.Mu.Lock()
+			p.ActiveUser = ""
+			p.Mu.Unlock()
 		}
 
 		// Clear the cookie

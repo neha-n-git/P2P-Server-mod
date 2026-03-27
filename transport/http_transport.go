@@ -55,6 +55,29 @@ func (t *HTTPTransport) RegisterWithPeer(peerAddress string, selfAddress string)
 	return nil
 }
 
+// FetchPeerInfo retrieves the identity/name of a remote peer.
+func (t *HTTPTransport) FetchPeerInfo(peerAddress string) (string, error) {
+	reqURL := fmt.Sprintf("http://%s/api/info", peerAddress)
+	resp, err := t.Client.Get(reqURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch peer info from %s: %w", peerAddress, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		respBody, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("fetch peer info failed at %s (status %d): %s", peerAddress, resp.StatusCode, string(respBody))
+	}
+
+	var info struct {
+		Name string `json:"name"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&info); err != nil {
+		return "", fmt.Errorf("failed to decode peer info from %s: %w", peerAddress, err)
+	}
+	return info.Name, nil
+}
+
 // FetchFileList retrieves the list of shared files from a remote peer.
 func (t *HTTPTransport) FetchFileList(peerAddress string) ([]file.FileMeta, error) {
 	reqURL := fmt.Sprintf("http://%s/api/files", peerAddress)

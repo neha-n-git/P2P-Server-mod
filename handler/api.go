@@ -51,6 +51,26 @@ func RegisterPeerHandler(p *peer.Peer, na *auth.NetworkAuth) http.HandlerFunc {
 	}
 }
 
+// PeerInfoHandler returns the basic identity of this peer.
+func PeerInfoHandler(p *peer.Peer) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		p.Mu.Lock()
+		displayName := p.ActiveUser
+		p.Mu.Unlock()
+		if displayName == "" {
+			displayName = p.PeerID
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"name": displayName})
+	}
+}
+
 // FileListHandler returns JSON list of all files this peer has.
 func FileListHandler(p *peer.Peer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -30,6 +30,7 @@ func BrowseFilesHandler(p *peer.Peer, t transport.Transport) http.HandlerFunc {
 
 		type PeerFile struct {
 			PeerAddress string `json:"peer_address"`
+			PeerName    string `json:"peer_name"`
 			FileName    string `json:"file_name"`
 			FileSize    int    `json:"file_size"`
 			TotalChunks int    `json:"total_chunks"`
@@ -40,6 +41,7 @@ func BrowseFilesHandler(p *peer.Peer, t transport.Transport) http.HandlerFunc {
 		peers := registry.GetPeers()
 		
 		seenFiles := make(map[string]*PeerFile)
+		peerNames := make(map[string]string)
 
 		for _, peerAddr := range peers {
 			if peerAddr == selfAddr {
@@ -50,12 +52,21 @@ func BrowseFilesHandler(p *peer.Peer, t transport.Transport) http.HandlerFunc {
 				log.Printf("[%s] Warning: could not fetch file list from %s: %v", p.PeerID, peerAddr, err)
 				continue
 			}
+
+			// Try to get peer name
+			peerName, err := t.FetchPeerInfo(peerAddr)
+			if err != nil || peerName == "" {
+				peerName = "Unknown Peer"
+			}
+			peerNames[peerAddr] = peerName
+
 			for _, f := range files {
 				if existing, ok := seenFiles[f.FileName]; ok {
 					existing.PeersCount++
 				} else {
 					seenFiles[f.FileName] = &PeerFile{
 						PeerAddress: peerAddr,
+						PeerName:    peerName,
 						FileName:    f.FileName,
 						FileSize:    f.FileSize,
 						TotalChunks: f.TotalChunks,
@@ -119,6 +130,16 @@ func DownloadHandler(p *peer.Peer, t transport.Transport) http.HandlerFunc {
 
 		log.Printf("[%s] Successfully downloaded '%s' (%d bytes) using %d peers", p.PeerID, fileName, len(result.Data), len(result.PeersUsed))
 
+		// Resolve peer names for UI display
+		peerNames := make(map[string]string)
+		for _, addr := range result.PeersUsed {
+			name, err := t.FetchPeerInfo(addr)
+			if err != nil || name == "" {
+				name = "Unknown Peer"
+			}
+			peerNames[addr] = name
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":        "success",
@@ -127,6 +148,7 @@ func DownloadHandler(p *peer.Peer, t transport.Transport) http.HandlerFunc {
 			"saved_to":      outPath,
 			"chunk_sources": result.ChunkSources,
 			"peers_used":    result.PeersUsed,
+			"peer_names":    peerNames,
 		})
 	}
 }
