@@ -7,8 +7,8 @@
   [![Go Version](https://img.shields.io/badge/Go-1.21%2B-00ADD8?style=flat&logo=go)](https://go.dev/)
 </div>
 
----
 
+---
 ## 📖 Overview & Inspiration
 
 This project is a decentralized **Peer-to-Peer (P2P) file sharing simulation** heavily inspired by the core mechanics of the **BitTorrent** protocol. 
