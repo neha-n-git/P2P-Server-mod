@@ -15,8 +15,9 @@ This project is a decentralized **Peer-to-Peer (P2P) file sharing simulation** h
 
 Unlike traditional client-server models, this system has no central server dictating file distribution. Every instance of the application acts as an independent "peer" (both client and server). When a file is uploaded to the swarm, it is divided into fixed-size chunks, hashed for integrity, and distributed across the network. When downloading, a peer requests chunks from multiple connected nodes simultaneously, maximizing bandwidth and demonstrating core distributed systems concepts in action.
 
-  <img src="screenshots/p2p.png" alt="P2P Server Logo" width="120" />
-
+<p align="center">
+  <img src="screenshots/p2p.png" alt="P2P Server Logo" width="240" />
+</p>
 ---
 
 ## ✨ Key Features
