@@ -58,6 +58,9 @@ func main() {
 		http.ServeFile(w, r, "web/upload.html")
 	})
 	http.HandleFunc("/download", handler.DownloadPageHandler())
+	http.HandleFunc("/image.png", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/image.png")
+	})
 
 	// Setup Routes — File Operations
 	http.HandleFunc("/api/upload", handler.UploadHandler(p))

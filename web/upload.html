@@ -3,37 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P2P File Upload</title>
+    <title>Upload File - P2P Network</title>
     <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
-        .container { border: 1px solid #ccc; padding: 2rem; border-radius: 8px; }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.5rem; }
-        input[type="file"] { display: block; }
-        button { background: #007bff; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        #status { margin-top: 1rem; }
+        :root {
+            --primary: #E4568B;
+            --secondary: #5D7B3D;
+            --accent: #F6C94D;
+            --background: #A7C7E4;
+            --soft-accent: #F29BB9;
+            --text-dark: #2A2A2A;
+            --page-bg: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: url("/image.png") center/cover no-repeat fixed;
+            color: var(--text-dark);
+            padding: 2rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(93, 123, 61, 0.1);
+            border: 4px solid var(--background);
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--secondary);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            opacity: 0.85;
+        }
+
+        nav { margin-bottom: 2rem; }
+        nav a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            transition: color 0.2s ease-in-out;
+        }
+        nav a:hover { color: var(--primary); }
+
+        .form-group {
+            background: var(--background);
+            border: 2px dashed rgba(246, 201, 77, 0.8); /* accent */
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .form-group:hover { 
+            border-color: var(--primary); 
+            background: rgba(167, 199, 228, 0.8); /* background with opacity */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--secondary);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* Custom file input styling */
+        input[type="file"] {
+            display: none;
+        }
+        
+        .file-custom {
+            display: inline-block;
+            background: #ffffff;
+            border: 2px solid var(--soft-accent);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            color: var(--primary);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .file-custom:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .file-name-display {
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--secondary);
+            word-break: break-all;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 800;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 15px rgba(228, 86, 139, 0.3);
+        }
+
+        button[type="submit"]:hover { 
+            background: var(--accent);
+            color: var(--text-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(246, 201, 77, 0.4);
+        }
+        button[type="submit"]:active { 
+            transform: translateY(1px); 
+        }
+
+        #status {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: center;
+            display: none;
+        }
+
+        .status-loading { display: block !important; background: var(--page-bg); color: var(--secondary); border: 2px solid var(--background); }
+        .status-success { display: block !important; background: rgba(93, 123, 61, 0.15); color: var(--secondary); border: 2px solid rgba(93, 123, 61, 0.4); }
+        .status-error { display: block !important; background: rgba(228, 86, 139, 0.15); color: var(--primary); border: 2px solid rgba(228, 86, 139, 0.4); }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Upload File to P2P Network</h1>
+        <nav><a href="/">← Return to Dashboard</a></nav>
+        <h1>Upload File</h1>
+        <p class="subtitle">Select a file to slice and dice for the network</p>
+
         <form id="uploadForm" action="/api/upload" method="post" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="file">Select File:</label>
-                <input type="file" id="file" name="file" required>
+                <label for="file">Drop file or click here</label>
+                <span class="file-custom" onclick="document.getElementById('file').click()">Choose File</span>
+                <input type="file" id="file" name="file" required onchange="document.getElementById('fileName').textContent = this.files[0]?.name || ''">
+                <div id="fileName" class="file-name-display"></div>
             </div>
-            <button type="submit">Upload & Chunk</button>
+            <button type="submit">Upload Document</button>
         </form>
         <div id="status"></div>
     </div>
 
     <script>
+        const statusDiv = document.getElementById('status');
+        
         document.getElementById('uploadForm').onsubmit = async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = 'Uploading...';
+            
+            statusDiv.className = 'status-loading';
+            statusDiv.textContent = 'Processing request...';
             
             try {
                 const response = await fetch('/api/upload', {
@@ -41,9 +194,17 @@
                     body: formData
                 });
                 const text = await response.text();
-                statusDiv.textContent = response.ok ? 'Success: ' + text : 'Error: ' + text;
+                
+                if (response.ok) {
+                    statusDiv.className = 'status-success';
+                    statusDiv.textContent = 'Success: Request completed successfully. ' + text;
+                } else {
+                    statusDiv.className = 'status-error';
+                    statusDiv.textContent = 'Error: ' + text;
+                }
             } catch (err) {
-                statusDiv.textContent = 'Network Error: ' + err.message;
+                statusDiv.className = 'status-error';
+                statusDiv.textContent = 'Connection Error: ' + err.message;
             }
         };
     </script>
